@@ -173,10 +173,10 @@ module ActiveMerchant #:nodoc:
       #
       # * <tt>:interval</tt> -- A hash containing information about the interval of time between payments. Must
       #   contain the keys <tt>:length</tt> and <tt>:unit</tt>. <tt>:unit</tt> can be either <tt>:months</tt> or <tt>:days</tt>.
-      #   If <tt>:unit</tt> is <tt>:months</tt> then <tt>:interval</tt> must be an integer between 1 and 12 inclusive.
-      #   If <tt>:unit</tt> is <tt>:days</tt> then <tt>:interval</tt> must be an integer between 7 and 365 inclusive.
+      #   If <tt>:unit</tt> is <tt>:months</tt> then <tt>:length</tt> must be an integer between 1 and 12 inclusive.
+      #   If <tt>:unit</tt> is <tt>:days</tt> then <tt>:length</tt> must be an integer between 7 and 365 inclusive.
       #   For example, to charge the customer once every three months the hash would be
-      #   +{ :unit => :months, :interval => 3 }+ (REQUIRED)
+      #   +:interval => { :unit => :months, :length => 3 }+ (REQUIRED)
       # * <tt>:duration</tt> -- A hash containing keys for the <tt>:start_date</tt> the subscription begins (also the date the
       #   initial billing occurs) and the total number of billing <tt>:occurences</tt> or payments for the subscription. (REQUIRED)
       def recurring(money, creditcard, options={})
@@ -334,7 +334,6 @@ module ActiveMerchant #:nodoc:
       end
 
       def add_address(post, options)
-
         if address = options[:billing_address] || options[:address]
           post[:address] = address[:address1].to_s
           post[:company] = address[:company].to_s
@@ -343,6 +342,18 @@ module ActiveMerchant #:nodoc:
           post[:city]    = address[:city].to_s
           post[:country] = address[:country].to_s
           post[:state]   = address[:state].blank?  ? 'n/a' : address[:state]
+        end
+        
+        if address = options[:shipping_address]
+          post[:ship_to_first_name] = address[:first_name].to_s
+          post[:ship_to_last_name] = address[:last_name].to_s
+          post[:ship_to_address] = address[:address1].to_s
+          post[:ship_to_company] = address[:company].to_s
+          post[:ship_to_phone]   = address[:phone].to_s
+          post[:ship_to_zip]     = address[:zip].to_s
+          post[:ship_to_city]    = address[:city].to_s
+          post[:ship_to_country] = address[:country].to_s
+          post[:ship_to_state]   = address[:state].blank?  ? 'n/a' : address[:state]
         end
       end
 
