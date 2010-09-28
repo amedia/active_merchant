@@ -113,7 +113,7 @@ module ActiveMerchant #:nodoc:
           mapping :terminal_color, 'color'
           mapping :force_payment_method, 'paytype'
           mapping :skip_last_page, 'skiplastpage'
-          mapping :security_key, 'md5sum'
+          mapping :security_key, 'md5key'
           mapping :make_ticket, 'maketicket'
           mapping :preauth, 'preauth'
         end
