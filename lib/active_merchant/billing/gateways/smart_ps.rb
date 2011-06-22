@@ -22,22 +22,26 @@ module ActiveMerchant #:nodoc:
       def authorize(money, creditcard, options = {})
         post = {}
         add_invoice(post, options)
-        add_payment_source(post, creditcard,options)        
-        add_address(post, options[:billing_address]||options[:address])
-        add_address(post, options[:shipping_address],"shipping")
+        add_payment_source(post, creditcard,options)
+        add_address(post, options[:billing_address] || options[:address])
+        add_address(post, options[:shipping_address], "shipping")
         add_customer_data(post, options)
-        
+        add_currency(post, money, options)
+        add_taxes(post, options)
+        add_processor(post, options)
         commit('auth', money, post)
       end
       
       def purchase(money, payment_source, options = {})
         post = {}
         add_invoice(post, options)
-        add_payment_source(post, payment_source, options)        
-        add_address(post, options)   
-        add_address(post, options[:shipping_address],"shipping")        
+        add_payment_source(post, payment_source, options)
+        add_address(post, options[:billing_address] || options[:address])
+        add_address(post, options[:shipping_address], "shipping")
         add_customer_data(post, options)
-             
+        add_currency(post, money, options)
+        add_taxes(post, options)
+        add_processor(post, options)     
         commit('sale', money, post)
       end                       
     
@@ -57,17 +61,18 @@ module ActiveMerchant #:nodoc:
         post = {}
         add_invoice(post, options)
         add_payment_source(post, payment_source, options)        
-        add_address(post, options)
+        add_address(post, options[:billing_address] || options[:address])
         add_customer_data(post, options)
         add_sku(post,options)
-        
+        add_currency(post, money, options)
+        add_processor(post, options)
         commit('credit', money, post)
       end
       
-      def refund(auth, options = {})
+      def refund(money, auth, options = {})
         post = {}
         add_transaction(post, auth)
-        commit('refund', options.delete(:amount), post)
+        commit('refund', money, post)
       end
       
       
@@ -79,7 +84,7 @@ module ActiveMerchant #:nodoc:
         post[:customer_vault] = "update_customer"
         add_customer_vault_id(post, vault_id)
         add_creditcard(post, creditcard, options)        
-        add_address(post, options)   
+        add_address(post, options[:billing_address] || options[:address])
         add_customer_data(post, options)
              
         commit(nil, nil, post)
@@ -138,7 +143,19 @@ module ActiveMerchant #:nodoc:
           post[prefix+"state"]      = address[:state].blank?  ? 'n/a' : address[:state]
         end         
       end
+      
+      def add_currency(post, money, options)
+        post[:currency] = options[:currency] || currency(money)
+      end
 
+      def add_taxes(post, options)
+        post[:tax] = amount(options[:tax])
+      end
+
+      def add_processor(post, options)
+        post[:processor] = options[:processor] unless options[:processor].nil?
+      end
+      
       def add_invoice(post, options)
         post[:orderid] = options[:order_id].to_s.gsub(/[^\w.]/, '')
       end

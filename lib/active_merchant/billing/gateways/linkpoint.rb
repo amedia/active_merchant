@@ -134,7 +134,7 @@ module ActiveMerchant #:nodoc:
       self.ssl_strict = false
       
       self.supported_countries = ['US']
-      self.supported_cardtypes = [:visa, :master, :american_express, :discover]
+      self.supported_cardtypes = [:visa, :master, :american_express, :discover, :jcb, :diners_club]
       self.homepage_url = 'http://www.linkpoint.com/'
       self.display_name = 'LinkPoint'
            
@@ -233,12 +233,17 @@ module ActiveMerchant #:nodoc:
       # 
       # identification must be a valid order id previously submitted by SALE
       #
-      def credit(money, identification, options = {})
+      def refund(money, identification, options = {})
         options.update(
           :ordertype => "CREDIT",
           :order_id => identification
         )
         commit(money, nil, options)
+      end
+
+      def credit(money, identification, options = {})
+        deprecated CREDIT_DEPRECATION_MESSAGE
+        refund(money, identification, options)
       end
     
       def test?
@@ -375,7 +380,7 @@ module ActiveMerchant #:nodoc:
         if billing_address = options[:billing_address] || options[:address]          
           
           params[:billing] = {}        
-          params[:billing][:name]      = billing_address[:name] || creditcard ? creditcard.name : nil
+          params[:billing][:name]      = billing_address[:name] || (creditcard ? creditcard.name : nil)
           params[:billing][:address1]  = billing_address[:address1] unless billing_address[:address1].blank?
           params[:billing][:address2]  = billing_address[:address2] unless billing_address[:address2].blank?
           params[:billing][:city]      = billing_address[:city]     unless billing_address[:city].blank?

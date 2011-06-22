@@ -59,10 +59,10 @@ module ActiveMerchant #:nodoc:
           mapping :ipaddress, 'ipaddress'
           mapping :testmode, 'testmode'
 
-          mapping :md5secret, 'md5secret'
+          mapping :credential2, 'md5secret'
 
           mapping :customer, ''
-          mapping :billing_address, ''
+          mapping :billing_address, {}
           mapping :tax, ''
           mapping :shipping, ''
         end
